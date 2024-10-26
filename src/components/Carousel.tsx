@@ -1,62 +1,87 @@
 "use client";
 import React, { useState } from 'react';
-import { CarouselDesignA } from './carousels/CarouselDesignA';
-import { CarouselDesignB } from './carousels/CarouselDesignB';
-import { CarouselDesignC } from './carousels/CarouselDesignC'; // Import CarouselDesignC
-import { CarouselDesignD } from './carousels/CarouselDesignD'; // Import CarouselDesignD
-
-// Map of carousel components
-const carouselMap = {
-  CarouselDesignA,
-  CarouselDesignB,
-  CarouselDesignC,
-  CarouselDesignD,
-} as const;
+import { CustomCarousel } from '@/components/carousels/CustomCarousel';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 
 interface TenantConfig {
   brandName: string;
-  // Add other properties that you expect in your config
 }
 
 interface CarouselProps {
-  config: TenantConfig; // Ensure this matches your config structure
+  config: TenantConfig; 
 }
 
-
-type CarouselKey = keyof typeof carouselMap;
-
 const CarouselSwitcher: React.FC<CarouselProps> = ({ config }) => {
-  // State to manage the current carousel design
-  const [currentCarousel, setCurrentCarousel] = useState<CarouselKey>('CarouselDesignA');
+  const [itemsCount, setItemsCount] = useState<number>(4);
+  const [itemsPreview, setItemsPreview] = useState<number>(2);
+  const [autoplay, setAutoplay] = useState<boolean>(false);
+  const [orientation, setOrientation] = useState<"horizontal" | "vertical">("horizontal");
 
-  // Function to handle carousel change
-  const handleCarouselChange = (carouselKey: CarouselKey) => {
-    setCurrentCarousel(carouselKey);
+  const handleItemsCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setItemsCount(Number(event.target.value));
   };
 
-  // Get the current Carousel component
-  const CarouselComponent = carouselMap[currentCarousel];
+  const handleItemsPreviewChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setItemsPreview(Number(event.target.value));
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <h1 className="text-xl font-bold mb-4">Welcome to {config.brandName}</h1>
-      {/* Render the current carousel with margin */}
-      <div className="w-full max-w-lg mb-6 p-16 border rounded shadow-lg justify-center items-center flex">
-        <CarouselComponent />
+      <div className='flex-col flex md:flex-row mb-6'>
+        <div className="md:mr-4 mr-2">
+          <Label>Items Count</Label>
+          <Input type="number" value={itemsCount} onChange={handleItemsCountChange} min={1} className="w-full max-w-xs mt-2" />
+        </div>
+
+        <div className="md:mr-4 mr-2">
+          <Label>Items Preview</Label>
+          <Input type="number" value={itemsPreview} onChange={handleItemsPreviewChange} min={1} className="w-full max-w-xs mt-2" />
+        </div>
+
+        <div className="md:mr-4 mr-2">
+          <Label>Autoplay</Label>
+          <div className="flex items-center justify-center py-1 h-10">
+            <Switch checked={autoplay} onCheckedChange={setAutoplay} id="autoplay-switch" />
+            <Label htmlFor="autoplay-switch" className="ml-2">Enable Autoplay</Label>
+          </div>
+        </div>
+
+        <div className="md:mr-4 mr-2">
+          <Label>Orientation</Label>
+          <Select onValueChange={(value) => setOrientation(value as "horizontal" | "vertical")}>
+            <SelectTrigger className="md:w-[180px]">
+              <SelectValue placeholder="Select orientation" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Carousel Orientation</SelectLabel>
+                <SelectItem value="horizontal">Horizontal</SelectItem>
+                <SelectItem value="vertical">Vertical</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-      {/* Render buttons for each carousel option */}
-      <div className="flex space-x-2">
-        {Object.keys(carouselMap).map((key) => (
-          <button
-            key={key}
-            className={`p-2 border rounded ${
-              currentCarousel === key ? 'bg-blue-500 text-white' : 'bg-gray-200'
-            }`}
-            onClick={() => handleCarouselChange(key as CarouselKey)}
-          >
-            {key}
-          </button>
-        ))}
+
+      <div className="w-full h-full aspect-[16/9] max-w-5xl mb-6 p-8 border rounded shadow-lg flex justify-center items-center"> {/* Adjust max width */}
+        <CustomCarousel 
+          itemsCount={itemsCount} 
+          itemsPreview={itemsPreview} 
+          autoplay={autoplay} 
+          orientation={orientation} 
+        />
       </div>
     </div>
   );
